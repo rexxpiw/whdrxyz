@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>whdrxyz_</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg-dark: #1e1e2f;
+      --text-dark: #e0e0e0;
+      --paper-dark: #2a2a3d;
+      --highlight: rgba(255, 255, 255, 0.05);
+      --shadow: rgba(0, 0, 0, 0.3);
+      --accent: #8ab4f8;
+    }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: 'Roboto Mono', monospace;
+      background: linear-gradient(135deg, #1e1e2f, #12121c);
+      color: var(--text-dark);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .toggle {
+      cursor: pointer;
+      padding: 0.3rem 0.6rem;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 5px;
+      transition: transform 0.2s;
+      font-weight: bold;
+    }
+
+    .toggle:hover {
+      transform: scale(1.1);
+      background: #a5c9ff;
+    }
+
+    .notes {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .note {
+      background: var(--paper-dark);
+      padding: 1rem;
+      box-shadow: 2px 2px 6px var(--shadow);
+      border-radius: 10px;
+      position: relative;
+      transition: background 0.3s ease, transform 0.2s ease-in-out, opacity 0.5s ease;
+      transform-origin: center;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .note:hover {
+      transform: scale(1.02);
+    }
+
+    .note textarea {
+      width: 100%;
+      min-height: 100px;
+      height: auto;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      overflow: hidden;
+    }
+
+    .note .delete {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: crimson;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.2s;
+    }
+
+    .note .delete:hover {
+      transform: scale(1.1);
+    }
+
+    .note.highlight {
+      background: var(--highlight);
+    }
+
+    .add-note {
+      padding: 0.6rem 1.2rem;
+      margin-top: 1rem;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: transform 0.2s;
+      align-self: center;
+      font-weight: bold;
+    }
+
+    .add-note:hover {
+      transform: scale(1.1);
+      background: #a5c9ff;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    .header h1 {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 4px solid;
+      animation: typing 2.5s steps(20) 0.5s normal both;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>whdrxyz_</h1>
+  </div>
+
+  <div class="notes" id="notes"></div>
+  <button class="add-note" onclick="addNote()">+ Catatan Baru</button>
+
+  <script>
+    const notesContainer = document.getElementById('notes');
+
+    function autoResize(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function saveNotes() {
+      const notes = Array.from(document.querySelectorAll('.note textarea')).map(textarea => textarea.value);
+      localStorage.setItem('whdrxyz_notes', JSON.stringify(notes));
+    }
+
+    function loadNotes() {
+      const saved = JSON.parse(localStorage.getItem('whdrxyz_notes') || '[]');
+      saved.forEach(text => createNote(text));
+    }
+
+    function createNote(content = '') {
+      const note = document.createElement('div');
+      note.className = 'note';
+
+      const textarea = document.createElement('textarea');
+      textarea.value = content;
+      textarea.oninput = () => {
+        autoResize(textarea);
+        saveNotes();
+      };
+      textarea.addEventListener('input', () => autoResize(textarea));
+      setTimeout(() => autoResize(textarea), 0);
+
+      const del = document.createElement('button');
+      del.className = 'delete';
+      del.textContent = 'X';
+      del.onclick = () => {
+        note.remove();
+        saveNotes();
+      };
+
+      note.appendChild(textarea);
+      note.appendChild(del);
+      notesContainer.appendChild(note);
+
+      note.onmouseover = () => note.classList.add('highlight');
+      note.onmouseout = () => note.classList.remove('highlight');
+    }
+
+    function addNote() {
+      createNote();
+      saveNotes();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    loadNotes();
+  </script>
+</body>
+</html>
